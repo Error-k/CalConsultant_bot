@@ -1,19 +1,29 @@
 {
-  "name": "firsttestjsbot",
+  "name": "calconsultantbot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "start:prod": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@grammyjs/conversations": "^2.1.0",
     "@grammyjs/hydrate": "^1.4.1",
     "dotenv": "^16.5.0",
     "grammy": "^1.36.1",
+    "mongoose": "^8.14.3",
     "nodemon": "^3.1.10",
     "openai": "^4.97.0"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   }
 }
