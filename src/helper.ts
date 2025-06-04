@@ -1,6 +1,6 @@
-import { BotError, GrammyError, HttpError } from 'grammy'
+import { BotError, GrammyError, HttpError, InlineKeyboard } from 'grammy'
 import { MAIN_MENU } from './consts'
-import { CommandCtx } from './types'
+import { CommandCtx, ConversationCtx } from './types'
 import mongoose from 'mongoose'
 import { bot } from '.'
 
@@ -24,7 +24,7 @@ export const getErrorCatch = (error: BotError<CommandCtx>) => {
   }
 }
 
-export async function startBot() {
+export const startBot = async () => {
   const MONGODB_URI = process.env.MONGODB_URI
   if (!MONGODB_URI) {
     throw new Error('MONGODB_URI is not defined')
@@ -37,4 +37,14 @@ export async function startBot() {
   } catch (error) {
     console.error('Error in startBot: ', error)
   }
+}
+
+export const getDefaultError = async (ctx: CommandCtx | ConversationCtx) => {
+  const inlineKeyboard = new InlineKeyboard()
+      .text('⬅️ Назад в меню', 'backToMainMenu').row()
+      .url('Чат с поддержкой', String(process.env.SUPPORT_CHAT_URL)).row()
+
+  ctx.reply('Возникла непредвиденная ошибка, пожалуйста, обратитесь в техническую поддержку:', {
+    reply_markup: inlineKeyboard
+  })
 }

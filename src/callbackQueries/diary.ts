@@ -8,7 +8,7 @@ export const diary = (ctx: CommandCtx) => {
   const inlineKeyboard = new InlineKeyboard()
     .text('⬅️ Назад в меню', 'backToMainMenu').row()
     .text('Моя дневная норма', 'dailyLimit').row()
-    .text('Ещё кнопка', 'button')
+    // .text('Ещё кнопка', 'button')
 
   // editText - метод из hydrate для интерактивного меню без захлмаления переписки
   ctx.callbackQuery?.message?.editText('Дневник питания и калькулятор калорий', {

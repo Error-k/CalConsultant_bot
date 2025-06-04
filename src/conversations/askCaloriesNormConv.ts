@@ -1,8 +1,10 @@
 import { Conversation } from "@grammyjs/conversations"
-import { Context } from "grammy"
-import { GENDERS } from "../consts"
+import { COMMAND_NAMES_WITH_SLASH, GENDERS } from "../consts"
+import { getDefaultError, getMainMenuReply } from "../helper"
+import { CommandCtx } from "../types"
+import { User } from "../models/User"
 
-export const askCaloriesNormConv = async (conversation: Conversation, ctx: Context) => {
+export const askCaloriesNormConv = async (conversation: Conversation, ctx: CommandCtx) => {
   await ctx.reply("Мы поможем Вам рассчитать суточную норму потребления калорий по формуле Миффлина-Сан Жеора! Для этого необходимо указать пол, вес, рост и возраст")
 
   let userGender = ""
@@ -13,6 +15,13 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   const getGender = async () => {
     await ctx.reply('✍️Пожалуйста, напишите Ваш ПОЛ одной буквой "Ж" или "М"')
     const gender = await conversation.waitFor("message:text")
+
+    // Выход из диалога, если пользователь отправляет любую комманду
+    if (COMMAND_NAMES_WITH_SLASH.includes(gender.message.text)) {
+      getMainMenuReply(ctx)
+      await conversation.halt()
+    }
+
     if (gender.message.text.length === 1 && GENDERS.includes(gender.message.text.toUpperCase())) {
       userGender = gender.message.text.toUpperCase()
     } else {
@@ -23,6 +32,13 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   const getMass = async () => {
     await ctx.reply('✍️Пожалуйста, напишите Ваш ВЕС в килограммах')
     const mass = await conversation.waitFor("message:text")
+
+    // Выход из диалога, если пользователь отправляет любую комманду
+    if (COMMAND_NAMES_WITH_SLASH.includes(mass.message.text)) {
+      getMainMenuReply(ctx)
+      await conversation.halt()
+    }
+
     const numberMass = Number(mass.message.text)
     if (Boolean(numberMass) && numberMass > 0) {
       userMass = numberMass
@@ -34,6 +50,13 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   const getHeight = async () => {
     await ctx.reply('✍️Пожалуйста, напишите Ваш РОСТ в сантиметрах')
     const height = await conversation.waitFor("message:text")
+
+    // Выход из диалога, если пользователь отправляет любую комманду
+    if (COMMAND_NAMES_WITH_SLASH.includes(height.message.text)) {
+      getMainMenuReply(ctx)
+      await conversation.halt()
+    }
+
     const numberHeight = Number(height.message.text)
     if (Boolean(numberHeight) && numberHeight > 0) {
       userHeight = numberHeight
@@ -45,6 +68,13 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   const getAge = async () => {
     await ctx.reply('✍️Пожалуйста, напишите Ваш ВОЗРАСТ в полных годах')
     const age = await conversation.waitFor("message:text")
+
+    // Выход из диалога, если пользователь отправляет любую комманду
+    if (COMMAND_NAMES_WITH_SLASH.includes(age.message.text)) {
+      getMainMenuReply(ctx)
+      await conversation.halt()
+    }
+
     const numberAge = Number(age.message.text)
     if (Boolean(numberAge) && numberAge > 0) {
       userAge = numberAge
@@ -55,9 +85,9 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   }
   const getDailyLimit = async () => {
     if (userGender === "М") {
-      return (10 * userMass) + (6.25 * userHeight) - (5 * userAge) + 5
+      return Math.floor((10 * userMass) + (6.25 * userHeight) - (5 * userAge) + 5)
     } else {
-      return (10 * userMass) + (6.25 * userHeight) - (5 * userAge) - 161
+      return Math.floor((10 * userMass) + (6.25 * userHeight) - (5 * userAge) - 161)
     }
   }
 
@@ -67,5 +97,16 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Conte
   await getAge()
   const dailyLimit = await getDailyLimit()
 
-  await ctx.reply(`Пол ${userGender}, Вес: ${userMass}, Возраст: ${userAge}, Норма калорий: ${dailyLimit}`)
+  if (Boolean(dailyLimit) && dailyLimit > 0) {
+    if (!ctx.from) {
+      console.error('Ошибка при получении данных о пользователе')
+      return getDefaultError(ctx)
+    }
+    const userId = { telegramId: ctx.from.id}
+    await User.findOneAndUpdate(userId, {
+      dailyLimit: dailyLimit,
+      todayRestLimit: dailyLimit,
+    })
+    await ctx.reply(`✅Задана ежедневная норма калорий: ${dailyLimit} ккал`)
+  }
 }
