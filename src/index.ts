@@ -28,7 +28,7 @@ import {
   enterCaloriesNormConv,
   subtractCaloriesConv,
 } from './conversations'
-// import { ScheduledTask } from 'node-cron'
+import cron, { ScheduledTask } from 'node-cron'
 
 if (!BOT_API_KEY) {
   throw new Error('BOT_API_KEY is not defined')
@@ -69,7 +69,17 @@ bot.api.setMyCommands(COMMANDS)
 
 // Обработка команд
 // --- beginning
-bot.command('start', async (ctx) => start(ctx))
+let cronTask: ScheduledTask | undefined;
+bot.command('start', async (ctx) => {
+  start(ctx)
+  if (!cronTask) {
+    cronTask = cron.schedule('0 1 * * *', () => {
+      updateDailyLimit(ctx)
+    }, {
+      timezone: 'Europe/Moscow'
+    })
+  }
+})
 
 // Клавиатура в сообщениях бота
 bot.command('menu', async (ctx) => {

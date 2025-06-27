@@ -1,6 +1,6 @@
 import { Conversation } from "@grammyjs/conversations"
 import { CommandCtx } from "../types"
-import { COMMAND_NAMES_WITH_SLASH, DAILY_LIMIT_KEYBOARD } from "../consts"
+import { COMMAND_NAMES_WITH_SLASH, HELLO_USER_KEYBOARD } from "../consts"
 import { getDefaultError, getMainMenuReply } from "../helper"
 import { User } from "../models/User"
 
@@ -32,7 +32,7 @@ export const calculateCaloriesConv = async (conversation: Conversation, ctx: Com
       await ctx.reply(`✅Ваш остаток калорий на сегодня: ${todayRestLimit} ккал`)
     } else {
       ctx.reply('Для начала Вам нужно задать свою дневную норму калорий:', {
-        reply_markup: DAILY_LIMIT_KEYBOARD,
+        reply_markup: HELLO_USER_KEYBOARD,
       })
     }
   } else {

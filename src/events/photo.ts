@@ -14,10 +14,13 @@ export const photo = async (ctx: CommandCtx) => {
   const userId = { telegramId: ctx.from.id }
   const user = await User.findOne(userId)
   const userRole = user?.role
-  const freeAttemptsRest = user?.freeAttempts
+  const freeAttemptsRest = user?.freePhotoAttempts
 
   if (userRole && [UserRoles.admin, UserRoles.subscriber].includes(userRole) || (userRole === UserRoles.user && Number(freeAttemptsRest) > 0)) {
-    await ctx.reply('👀 Рассматриваю фотографию...')
+    const waitingMessage = await ctx.reply('👀 Рассматриваю фотографию...')
+
+    const chatId = Number(ctx.chat?.id)
+    const messageId = waitingMessage.message_id
 
     const photo = await ctx.getFile()
     const path = photo.file_path;
@@ -43,18 +46,34 @@ export const photo = async (ctx: CommandCtx) => {
         },
       ],
     })
-    await User.findOneAndUpdate(userId, {
-      freeAttempts: Number(freeAttemptsRest) - 1,
-    })
+
+    const freeAttemptsRestAfterResponse = Number(freeAttemptsRest) - 1
+
+    if (userRole === UserRoles.user) {
+      await User.findOneAndUpdate(userId, {
+        freePhotoAttempts: freeAttemptsRestAfterResponse,
+      })
+    }
 
     const inlineKeyboard = new InlineKeyboard()
       .text('✏️ Вычесть из дневного лимита', 'calculateCalories')
 
+    await ctx.api.deleteMessage(chatId, messageId)
     await ctx.reply(response.output_text, {
       reply_markup: inlineKeyboard,
     })
+
+    if (userRole === UserRoles.user) {
+      const letterCheckedString =
+        freeAttemptsRestAfterResponse === 1
+          ? `остался ${freeAttemptsRestAfterResponse} пробный фото-вопрос`
+          : `осталось ${freeAttemptsRestAfterResponse} пробных фото-вопросов`
+
+      await ctx.reply(`У Вас ${letterCheckedString}! ⏳`)
+    }
+    
   } else {
-    await ctx.reply('У Вас закончились пробные запросы😢 Пожалуйста, оформите подписку, чтобы использовать все возможности "Калорийного консультанта" без ограничений', {
+    await ctx.reply('У Вас закончились пробные фото-вопросы😢 Пожалуйста, оформите подписку, чтобы использовать все возможности "Калорийного консультанта" без ограничений', {
       reply_markup: MAIN_MENU,
     })
   }

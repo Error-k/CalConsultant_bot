@@ -13,7 +13,8 @@ interface IUser extends Document {
   dailyLimit: number
   todayRestLimit: number
   role: UserRoles
-  freeAttempts: number
+  freePhotoAttempts: number
+  freeTextAttempts: number
   createdAt: Date
 }
 
@@ -28,7 +29,8 @@ const userSchema = new Schema<IUser>({
   dailyLimit: { type: Number },
   todayRestLimit: { type: Number },
   role: { type: String },
-  freeAttempts: { type: Number },
+  freePhotoAttempts: { type: Number },
+  freeTextAttempts: { type: Number },
 }, {
   timestamps: true,
 })

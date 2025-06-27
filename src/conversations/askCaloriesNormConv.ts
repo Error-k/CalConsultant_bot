@@ -108,5 +108,6 @@ export const askCaloriesNormConv = async (conversation: Conversation, ctx: Comma
       todayRestLimit: dailyLimit,
     })
     await ctx.reply(`✅Задана ежедневная норма калорий: ${dailyLimit} ккал`)
+    await getMainMenuReply(ctx)
   }
 }

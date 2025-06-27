@@ -28,10 +28,15 @@ export const MAIN_MENU = new InlineKeyboard()
 
 export const DAILY_LIMIT_KEYBOARD = new InlineKeyboard()
   .text('⬅️ Назад в дневник питания', 'diary').row()
-  .text('Узнать свою норму калорий', 'askCaloriesNorm').row()
-  .text('Ввести свою норму калорий', 'enterCaloriesNorm').row()
+  .text('❔ Узнать свою норму калорий', 'askCaloriesNorm').row()
+  .text('✏️ Ввести свою норму калорий', 'enterCaloriesNorm').row()
   .text('Остаток калорий на сегодня', 'caloriesRest').row()
   .text('Вычесть из сегодняшнего лимита', 'subtractCalories').row()
   .text('Сбросить ежедневный лимит (наступил новый день)', 'updateDailyLimit')
+
+export const HELLO_USER_KEYBOARD = new InlineKeyboard()
+  .text('❔ Узнать свою норму калорий', 'askCaloriesNorm').row()
+  .text('✏️ Ввести свою норму калорий', 'enterCaloriesNorm').row()
+  .text('⬅️ Заполнить позже через меню дневника', 'backToMainMenu').row()
 
 export const GENDERS = ["М", "Ж"]

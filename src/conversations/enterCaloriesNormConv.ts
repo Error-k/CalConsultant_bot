@@ -26,6 +26,7 @@ export const enterCaloriesNormConv = async (conversation: Conversation, ctx: Com
       todayRestLimit: numberValue,
     })
     await ctx.reply(`✅Задана ежедневная норма калорий: ${message.text} ккал`)
+    await getMainMenuReply(ctx)
   } else {
     await ctx.reply(`⚠️Пожалуйста, введите значение целым числом без лишних букв и символов`)
     await enterCaloriesNormConv(conversation, ctx)

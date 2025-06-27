@@ -1,11 +1,9 @@
-import { ScheduledTask } from 'node-cron'
+import { HELLO_USER_KEYBOARD } from '../consts'
 import { getMainMenuReply } from '../helper'
 import { User } from '../models/User'
 import { CommandCtx, ConversationCtx } from '../types'
-// import { updateDailyLimit } from '../utilities/updateDailyLimit'
 
-// ДОПИЛИТЬ updateDailyLimit
-export const start = async (ctx: CommandCtx & ConversationCtx, cronTask?: ScheduledTask) => {
+export const start = async (ctx: CommandCtx & ConversationCtx) => {
   if (!ctx.from) {
     ctx.reply('Информация о пользователе не доступна')
   }
@@ -16,7 +14,6 @@ export const start = async (ctx: CommandCtx & ConversationCtx, cronTask?: Schedu
     const existingUser = await User.findOne({ telegramId: id })
     if (existingUser) {
       // Пользователь уже зарегистрирован
-      // updateDailyLimit(ctx, cronTask)
       return getMainMenuReply(ctx)
     }
 
@@ -25,16 +22,17 @@ export const start = async (ctx: CommandCtx & ConversationCtx, cronTask?: Schedu
       firstName: first_name,
       username,
       role: 'user',
-      freeAttempts: 5,
+      freePhotoAttempts: 5,
+      freeTextAttempts: 2,
     })
     newUser.save()
-    // updateDailyLimit(ctx, cronTask)
     // Успешная регистрация
-    return getMainMenuReply(ctx)
+    return ctx.reply('👋 Приветствую! Перед началом работы с ботом рекомендуется указать свою дневную норму калорий - это позволит использовать функционал Калорийного Консультанта полностью!', {
+      reply_markup: HELLO_USER_KEYBOARD,
+    })
 
   } catch (error) {
     console.error('Ошибка регистрации пользователя:', error)
-    ctx.reply('Произошла ошибка регистрации, мы уже занимаемся этой проблемой')
+    ctx.reply('Произошла ошибка, мы уже занимаемся этой проблемой 😢')
   }
-
 }
